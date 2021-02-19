@@ -1,0 +1,6 @@
+
+.git/
+bin/
+build/
+out/
+build/classes/java/main/engine/IncompleteQuiz.class
