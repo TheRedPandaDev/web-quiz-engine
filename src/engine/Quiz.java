@@ -5,16 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import javax.persistence.*;
 
+@Entity
+@SequenceGenerator(name = "seq", initialValue = 1)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Quiz {
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+    private Long id;
     private String title;
     private String text;
     private String[] options;
     @JsonIgnore
-    private List<Integer> answer;
+    private Integer[] answer;
 }

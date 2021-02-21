@@ -13,12 +13,12 @@ import java.util.*;
 @Validated
 public class Controller {
     @Autowired
-    QuizService quizService;
+    QuizServiceImpl quizService;
 
     @GetMapping("/quiz")
     @ResponseBody
     public Quiz getQuiz() {
-        return new Quiz(1, "The Java Logo", "What is depicted on the Java logo?", new String[] {"Robot", "Tea leaf", "Cup of coffee", "Bug"}, List.of(2));
+        return new Quiz(1L, "The Java Logo", "What is depicted on the Java logo?", new String[] {"Robot", "Tea leaf", "Cup of coffee", "Bug"}, new Integer[] {2});
     }
 
     @PostMapping("/quiz")
@@ -32,7 +32,7 @@ public class Controller {
 
     @PostMapping(value = "/quizzes", consumes = "application/json")
     public Quiz postQuizzes(@Valid @RequestBody IncompleteQuiz incompleteQuiz) {
-        return quizService.createQuiz(incompleteQuiz);
+        return quizService.saveQuiz(incompleteQuiz);
     }
 
     @GetMapping("/quizzes")
@@ -43,13 +43,13 @@ public class Controller {
 
     @GetMapping("/quizzes/{id}")
     @ResponseBody
-    public Quiz getQuizzesId(@PathVariable("id") int id) {
+    public Quiz getQuizzesId(@PathVariable("id") Long id) {
         return quizService.getQuizById(id);
     }
 
     @PostMapping("/quizzes/{id}/solve")
     public Response postQuizzesIdSolve(
-            @PathVariable("id") @Min(1) int id, @Valid @RequestBody Answer answer) {
+            @PathVariable("id") @Min(1) Long id, @Valid @RequestBody Answer answer) {
         return quizService.solveQuizById(id, answer);
     }
 }
