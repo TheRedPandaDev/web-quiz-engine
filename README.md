@@ -16,9 +16,9 @@ Post your own quiz
 Consumes a JSON:
 ```javascript
 {
-  "title": "TITLE HERE" // Must not be empty
-  "text": "TEXT HERE" // Must not be empty
-  "options": ["OPTION1", "OPTION2"] // Must not be null, must have at least 2 options
+  "title": "TITLE HERE", // Must not be empty
+  "text": "TEXT HERE", // Must not be empty
+  "options": ["OPTION1", "OPTION2"], // Must not be null, must have at least 2 options
   "answer": [0,1]
 }
 ```
