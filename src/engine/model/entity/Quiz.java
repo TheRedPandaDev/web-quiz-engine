@@ -1,4 +1,4 @@
-package engine;
+package engine.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -21,4 +21,8 @@ public class Quiz {
     private String[] options;
     @JsonIgnore
     private Integer[] answer;
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }

@@ -1,4 +1,4 @@
-package engine;
+package engine.model.entity;
 
 
 import lombok.AllArgsConstructor;
@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Response {
+public class Feedback {
     boolean success;
     String feedback;
 }

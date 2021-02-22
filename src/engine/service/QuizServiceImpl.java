@@ -1,12 +1,16 @@
-package engine;
+package engine.service;
 
+import engine.model.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public final class QuizServiceImpl implements QuizService {
@@ -14,17 +18,20 @@ public final class QuizServiceImpl implements QuizService {
     @Autowired
     private QuizRepository quizRepository;
 
-    public Quiz saveQuiz(IncompleteQuiz incompleteQuiz) {
+    @Autowired
+    private UserRepository userRepository;
+
+    public Quiz saveQuiz(IncompleteQuiz incompleteQuiz, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName());
         Quiz newQuiz = new Quiz();
 
         newQuiz.setTitle(incompleteQuiz.getTitle());
         newQuiz.setText(incompleteQuiz.getText());
         newQuiz.setOptions(incompleteQuiz.getOptions());
         newQuiz.setAnswer(incompleteQuiz.getAnswer());
+        newQuiz.setUser(user);
 
-        quizRepository.save(newQuiz);
-
-        return newQuiz;
+        return quizRepository.save(newQuiz);
     }
 
     public List<Quiz> getAllQuizzes() {
@@ -35,7 +42,7 @@ public final class QuizServiceImpl implements QuizService {
         return quizRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    public Response solveQuizById(Long id, Answer answer) {
+    public Feedback solveQuizById(Long id, Answer answer) {
         Quiz reqQuiz = quizRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (reqQuiz == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -66,10 +73,25 @@ public final class QuizServiceImpl implements QuizService {
                 flag = false;
             }
             if (flag) {
-                return new Response(true, "Congratulations, you're right!");
+                return new Feedback(true, "Congratulations, you're right!");
             } else {
-                return new Response(false, "Wrong answer! Please, try again.");
+                return new Feedback(false, "Wrong answer! Please, try again.");
             }
         }
+    }
+
+    @Override
+    public ResponseEntity<String> deleteQuizById(Long id, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName());
+        Optional<Quiz> optionalQuiz = quizRepository.findById(id);
+        if (optionalQuiz.isEmpty()) {
+            return new ResponseEntity<>("Not found", HttpStatus.NOT_FOUND);
+        }
+        Quiz quiz = optionalQuiz.get();
+        if (!quiz.getUser().getId().equals(user.getId())) {
+            return new ResponseEntity<>("Forbidden", HttpStatus.FORBIDDEN);
+        }
+        quizRepository.delete(quiz);
+        return new ResponseEntity<>("Successful", HttpStatus.NO_CONTENT);
     }
 }
