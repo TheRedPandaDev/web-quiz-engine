@@ -1,37 +1,34 @@
 package engine.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Quiz {
+public class Completion {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonIgnore
     private Long id;
 
-    private String title;
-
-    private String text;
-
-    private String[] options;
-
-    @JsonIgnore
-    private Integer[] answer;
-
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "quiz")
-    private List<Completion> completions;
+    @ManyToOne
+    @JoinColumn(name = "quiz_id", nullable = false)
+    @JsonProperty("id")
+    private Quiz quiz;
+
+    @Column(columnDefinition = "TIMESTAMP", nullable = false)
+    private LocalDateTime completedAt = LocalDateTime.now();
 }

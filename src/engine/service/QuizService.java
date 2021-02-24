@@ -1,9 +1,6 @@
 package engine.service;
 
-import engine.model.entity.Answer;
-import engine.model.entity.Feedback;
-import engine.model.entity.IncompleteQuiz;
-import engine.model.entity.Quiz;
+import engine.model.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
@@ -14,14 +11,14 @@ public interface QuizService {
     /**
      * Get all quizzes.
      * @param page Page
-     * @return List of all quizzes.
+     * @return Page of quizzes
      */
     Page<Quiz> getAllQuizzes(int page);
 
     /**
      * Get quiz by id.
      * @param id Id
-     * @return Qiz
+     * @return Quiz
      */
     Quiz getQuizById(Long id);
 
@@ -38,7 +35,7 @@ public interface QuizService {
      * @param answer Answer
      * @return Feedback
      */
-    Feedback solveQuizById(Long id, Answer answer);
+    Feedback solveQuizById(Long id, Answer answer, Principal principal);
 
     /**
      * Delete quiz by id.
@@ -47,4 +44,11 @@ public interface QuizService {
      * @return ResponseEntity<String>
      */
     ResponseEntity<String> deleteQuizById(Long id, Principal principal);
+
+    /**
+     * Get all completions of quizzes for a specified user
+     * @param principal Principal
+     * @return Page of completions
+     */
+    Page<CompletionDTO> getCompletionsByUser(int page, Principal principal);
 }

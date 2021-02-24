@@ -24,6 +24,9 @@ public final class QuizServiceImpl implements QuizService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CompletionRepository completionRepository;
+
     public Quiz saveQuiz(IncompleteQuiz incompleteQuiz, Principal principal) {
         User user = userRepository.findByEmail(principal.getName());
         Quiz newQuiz = new Quiz();
@@ -45,7 +48,8 @@ public final class QuizServiceImpl implements QuizService {
         return quizRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    public Feedback solveQuizById(Long id, Answer answer) {
+    public Feedback solveQuizById(Long id, Answer answer, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName());
         Quiz reqQuiz = quizRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (reqQuiz == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -76,6 +80,10 @@ public final class QuizServiceImpl implements QuizService {
                 flag = false;
             }
             if (flag) {
+                Completion completion = new Completion();
+                completion.setUser(user);
+                completion.setQuiz(reqQuiz);
+                completionRepository.save(completion);
                 return new Feedback(true, "Congratulations, you're right!");
             } else {
                 return new Feedback(false, "Wrong answer! Please, try again.");
@@ -96,5 +104,18 @@ public final class QuizServiceImpl implements QuizService {
         }
         quizRepository.delete(quiz);
         return new ResponseEntity<>("Successful", HttpStatus.NO_CONTENT);
+    }
+
+    @Override
+    public Page<CompletionDTO> getCompletionsByUser(int page, Principal principal) {
+        return completionRepository.findAllByUserOrderByCompletedAtDesc(
+                principal.getName(), PageRequest.of(page, 10)).map(QuizServiceImpl::convertCompletionToDto);
+    }
+
+    private static CompletionDTO convertCompletionToDto(Completion completion) {
+        CompletionDTO completionDTO = new CompletionDTO();
+        completionDTO.setQuizId(completion.getQuiz().getId());
+        completionDTO.setCompletedAt(completion.getCompletedAt());
+        return completionDTO;
     }
 }

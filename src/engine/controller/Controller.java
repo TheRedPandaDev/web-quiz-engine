@@ -1,6 +1,7 @@
 package engine.controller;
 
 import engine.model.entity.*;
+import engine.service.CompletionDTO;
 import engine.service.QuizServiceImpl;
 import engine.service.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -33,7 +35,8 @@ public class Controller {
                 "What is depicted on the Java logo?",
                 new String[] {"Robot", "Tea leaf", "Cup of coffee", "Bug"},
                 new Integer[] {2},
-                new User()),
+                new User(),
+                List.of()),
                 HttpStatus.OK);
     }
 
@@ -74,8 +77,15 @@ public class Controller {
 
     @PostMapping("/quizzes/{id}/solve")
     public ResponseEntity<Feedback> postQuizzesIdSolve(
-            @PathVariable("id") @Min(1) Long id, @Valid @RequestBody Answer answer) {
-        return new ResponseEntity<>(quizService.solveQuizById(id, answer), HttpStatus.OK);
+            @PathVariable("id") @Min(1) Long id, @Valid @RequestBody Answer answer, Principal principal) {
+        return new ResponseEntity<>(quizService.solveQuizById(id, answer, principal), HttpStatus.OK);
+    }
+
+    @GetMapping("/quizzes/completed")
+    public ResponseEntity<Page<CompletionDTO>> getCompleted(
+            @RequestParam(value = "page", defaultValue = "0") @Min(0) int page,
+            Principal principal) {
+        return new ResponseEntity<>(quizService.getCompletionsByUser(page, principal), HttpStatus.OK);
     }
 
     @PostMapping("/register")
