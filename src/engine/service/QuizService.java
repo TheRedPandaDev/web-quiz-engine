@@ -4,6 +4,7 @@ import engine.model.entity.Answer;
 import engine.model.entity.Feedback;
 import engine.model.entity.IncompleteQuiz;
 import engine.model.entity.Quiz;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 
 import java.security.Principal;
@@ -12,9 +13,10 @@ import java.util.List;
 public interface QuizService {
     /**
      * Get all quizzes.
+     * @param page Page
      * @return List of all quizzes.
      */
-    List<Quiz> getAllQuizzes();
+    Page<Quiz> getAllQuizzes(int page);
 
     /**
      * Get quiz by id.

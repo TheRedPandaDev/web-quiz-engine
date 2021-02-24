@@ -4,6 +4,7 @@ import engine.model.entity.*;
 import engine.service.QuizServiceImpl;
 import engine.service.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.security.Principal;
-import java.util.*;
 
 @RestController
 @RequestMapping("/api")
@@ -57,8 +57,8 @@ public class Controller {
 
     @GetMapping("/quizzes")
     @ResponseBody
-    public ResponseEntity<List<Quiz>> getQuizzes() {
-        return new ResponseEntity<>(quizService.getAllQuizzes(), HttpStatus.OK);
+    public ResponseEntity<Page<Quiz>> getQuizzes(@RequestParam(value = "page", defaultValue = "0") @Min(0) int page) {
+        return new ResponseEntity<>(quizService.getAllQuizzes(page), HttpStatus.OK);
     }
 
     @GetMapping("/quizzes/{id}")
@@ -83,10 +83,8 @@ public class Controller {
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         String encodedPassword = passwordEncoder.encode(user.getPassword());
         user.setPassword(encodedPassword);
-        User savedUser = null;
-        System.out.println(user);
         try {
-            savedUser = userRepository.save(user);
+            userRepository.save(user);
         } catch (Exception e) {
             return new ResponseEntity<>("The email is already taken by another user", HttpStatus.BAD_REQUEST);
         }

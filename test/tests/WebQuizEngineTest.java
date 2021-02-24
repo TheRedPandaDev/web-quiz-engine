@@ -208,20 +208,20 @@ public class WebQuizEngineTest extends SpringTest {
 
 
         // Add 2 quizzes and check their existence
-        () -> testAllQuizzes(0, 1),
-        () -> testAllQuizzes(0, 2),
+        () -> testAllQuizzes(0, 0,1),
+        () -> testAllQuizzes(0, 0,2),
 
         () -> testCreateQuiz(0, 1),
         () -> testQuizExists(0, 2),
         () -> testQuizNotExists(0, 2, 125),
 
-        () -> testAllQuizzes(1, 1),
+        () -> testAllQuizzes(1, 0,1),
 
         () -> testCreateQuiz(1, 2),
         () -> testQuizExists(1, 2),
         () -> testQuizNotExists(1, 2, 125),
 
-        () -> testAllQuizzes(2, 2),
+        () -> testAllQuizzes(2, 0,2),
 
 
         // No auth operations tests
@@ -232,6 +232,7 @@ public class WebQuizEngineTest extends SpringTest {
         () -> testSolveQuizNoAuth(quizIds[1], "[1]"),
         () -> testDeleteQuizzesNoAuth(quizIds[0]),
         () -> testDeleteQuizzesNoAuth(quizIds[1]),
+        () -> testCompletedQuizzesNoAuth(),
 
 
         // Fake auth operations tests
@@ -242,6 +243,7 @@ public class WebQuizEngineTest extends SpringTest {
         () -> testSolveQuizFakeAuth(quizIds[1], "[1]"),
         () -> testDeleteQuizzesFakeAuth(quizIds[0]),
         () -> testDeleteQuizzesFakeAuth(quizIds[1]),
+        () -> testCompletedQuizzesFakeAuth(),
 
 
         // Solve two quizzes
@@ -250,22 +252,35 @@ public class WebQuizEngineTest extends SpringTest {
         () -> checkQuizSuccess(quizIds[0], "[2]", true, 1),
         () -> checkQuizSuccess(quizIds[0], "[3]", false, 2),
 
-        () -> checkQuizSuccess(quizIds[1], "[0]", false, 2),
-        () -> checkQuizSuccess(quizIds[1], "[1]", true, 1),
-        () -> checkQuizSuccess(quizIds[1], "[2]", false, 2),
-        () -> checkQuizSuccess(quizIds[1], "[3]", false, 1),
+        () -> checkQuizSuccess(quizIds[1], "[0]", false, 1),
+        () -> checkQuizSuccess(quizIds[1], "[1]", true, 2),
+        () -> checkQuizSuccess(quizIds[1], "[2]", false, 1),
+        () -> checkQuizSuccess(quizIds[1], "[3]", false, 2),
+
+
+        // Check completed
+        () -> testCompletedQuizzes(1, 1, 0 ,0, quizIds[0]),
+        () -> testCompletedQuizzes(1, 2, 0, 0, quizIds[1]),
 
 
         // Test database save
-        () -> testAllQuizzes(2, 1),
-        () -> testAllQuizzes(2, 2),
+        () -> testAllQuizzes(2, 0, 1),
+        () -> testAllQuizzes(2, 0,2),
         () -> reloadServer(),
-        () -> testAllQuizzes(2, 1),
-        () -> testAllQuizzes(2, 2),
-        () -> checkQuizSuccess(quizIds[0], "[2]", true, 1),
-        () -> checkQuizSuccess(quizIds[0], "[3]", false, 2),
-        () -> checkQuizSuccess(quizIds[1], "[0]", false, 1),
-        () -> checkQuizSuccess(quizIds[1], "[1]", true, 2),
+        () -> testAllQuizzes(2, 0,1),
+        () -> testAllQuizzes(2, 0,2),
+        () -> checkQuizSuccess(quizIds[0], "[2]", true, 2),
+        () -> checkQuizSuccess(quizIds[0], "[3]", false, 1),
+        () -> checkQuizSuccess(quizIds[1], "[0]", false, 2),
+        () -> checkQuizSuccess(quizIds[1], "[1]", true, 1),
+
+
+        // Check completed
+        () -> testCompletedQuizzes(2, 1, 0 ,1, quizIds[0]),
+        () -> testCompletedQuizzes(2, 1, 0 ,0, quizIds[1]),
+
+        () -> testCompletedQuizzes(2, 2, 0, 1, quizIds[1]),
+        () -> testCompletedQuizzes(2, 2, 0, 0, quizIds[0]),
 
 
         // Test wrongly created quizzes
@@ -374,13 +389,61 @@ public class WebQuizEngineTest extends SpringTest {
         () -> checkQuizSuccess(quizIds[6], "[1,2,3]", false, 2),
         () -> checkQuizSuccess(quizIds[6], "[0,1,2,3]", false, 2),
 
-        () -> testAllQuizzes(7, 2),
+        () -> testAllQuizzes(7, 0,2),
         () -> reloadServer(),
-        () -> testAllQuizzes(7, 2),
+        () -> testAllQuizzes(7, 0,2),
         () -> checkQuizSuccess(quizIds[5], "[]", true, 1),
         () -> checkQuizSuccess(quizIds[5], "[0]", false, 2),
         () -> checkQuizSuccess(quizIds[6], "[0,1,2]", false, 1),
         () -> checkQuizSuccess(quizIds[6], "[0,1,3]", true, 2),
+
+
+        // Check completed
+        () -> testCompletedQuizzes(5, 1, 0 ,4, quizIds[0]),
+        () -> testCompletedQuizzes(5, 1, 0 ,3, quizIds[1]),
+        () -> testCompletedQuizzes(5, 1, 0 ,2, quizIds[4]),
+        () -> testCompletedQuizzes(5, 1, 0 ,1, quizIds[5]),
+        () -> testCompletedQuizzes(5, 1, 0 ,0, quizIds[5]),
+
+        () -> testCompletedQuizzes(6, 2, 0, 5, quizIds[1]),
+        () -> testCompletedQuizzes(6, 2, 0, 4, quizIds[0]),
+        () -> testCompletedQuizzes(6, 2, 0, 3, quizIds[2]),
+        () -> testCompletedQuizzes(6, 2, 0, 2, quizIds[3]),
+        () -> testCompletedQuizzes(6, 2, 0, 1, quizIds[6]),
+        () -> testCompletedQuizzes(6, 2, 0, 0, quizIds[6]),
+
+
+        // Test pagination completed quizzes
+        () -> checkQuizSuccess(quizIds[4], "[]", true, 1),
+        () -> checkQuizSuccess(quizIds[4], "[]", true, 1),
+        () -> checkQuizSuccess(quizIds[4], "[]", true, 1),
+        () -> checkQuizSuccess(quizIds[4], "[]", true, 1),
+        () -> checkQuizSuccess(quizIds[4], "[]", true, 1),
+        () -> checkQuizSuccess(quizIds[6], "[0,1,3]", true, 1),
+
+        () -> checkQuizSuccess(quizIds[3], "[1,3]", true, 2),
+        () -> checkQuizSuccess(quizIds[3], "[1,3]", true, 2),
+        () -> checkQuizSuccess(quizIds[3], "[1,3]", true, 2),
+        () -> checkQuizSuccess(quizIds[3], "[1,3]", true, 2),
+        () -> checkQuizSuccess(quizIds[3], "[1,3]", true, 2),
+        () -> checkQuizSuccess(quizIds[5], "[]", true, 2),
+
+        () -> testCompletedQuizzes(10, 1, 0 ,0, quizIds[6]),
+        () -> testCompletedQuizzes(10, 1, 0 ,1, quizIds[4]),
+        () -> testCompletedQuizzes(10, 1, 0 ,2, quizIds[4]),
+        () -> testCompletedQuizzes(10, 1, 0 ,3, quizIds[4]),
+        () -> testCompletedQuizzes(10, 1, 0 ,4, quizIds[4]),
+        () -> testCompletedQuizzes(10, 1, 0 ,5, quizIds[4]),
+        () -> testCompletedQuizzes(1, 1, 1 ,0, quizIds[0]),
+
+        () -> testCompletedQuizzes(10, 2, 0 ,0, quizIds[5]),
+        () -> testCompletedQuizzes(10, 2, 0 ,1, quizIds[3]),
+        () -> testCompletedQuizzes(10, 2, 0 ,2, quizIds[3]),
+        () -> testCompletedQuizzes(10, 2, 0 ,3, quizIds[3]),
+        () -> testCompletedQuizzes(10, 2, 0 ,4, quizIds[3]),
+        () -> testCompletedQuizzes(10, 2, 0 ,5, quizIds[3]),
+        () -> testCompletedQuizzes(2, 2, 1 ,1, quizIds[1]),
+        () -> testCompletedQuizzes(2, 2, 1 ,0, quizIds[0]),
 
 
         // Test delete
@@ -401,13 +464,30 @@ public class WebQuizEngineTest extends SpringTest {
         () -> testQuizNotExists(1, 1, 0),
         () -> testQuizNotExists(1, 2, 0),
 
-        () -> testAllQuizzes(5, 1),
+        () -> testAllQuizzes(5, 0,1),
         () -> reloadServer(),
-        () -> testAllQuizzes(5, 2),
+        () -> testAllQuizzes(5, 0,2),
         () -> testQuizNotExists(0, 1, 0),
         () -> testQuizNotExists(0, 2, 0),
         () -> testQuizNotExists(1, 1, 0),
         () -> testQuizNotExists(1, 2, 0),
+
+
+        // Test pagination all quizzes
+        () -> testCreateQuiz(6, 1),
+        () -> testCreateQuiz(6, 2),
+        () -> testCreateQuiz(6, 1),
+        () -> testCreateQuiz(6, 1),
+        () -> testCreateQuiz(6, 1),
+        () -> testCreateQuiz(6, 2),
+        () -> testCreateQuiz(6, 1),
+        () -> testCreateQuiz(6, 2),
+        () -> testCreateQuiz(6, 1),
+        () -> testCreateQuiz(6, 2),
+        () -> testAllQuizzes(10, 0,1),
+        () -> testAllQuizzes(10, 0,2),
+        () -> testAllQuizzes(5, 1,1),
+        () -> testAllQuizzes(5, 1,2),
     };
 
     private CheckResult testRegister(String login, String password, int status) {
@@ -416,7 +496,8 @@ public class WebQuizEngineTest extends SpringTest {
         json.addProperty("password", password);
 
         String url = "/api/register";
-        HttpResponse resp = post(url, getPrettyJson(json)).send();
+        HttpRequest req = post(url, getPrettyJson(json));
+        HttpResponse resp = req.send();
 
         checkStatusCode(resp, status);
         return CheckResult.correct();
@@ -424,21 +505,23 @@ public class WebQuizEngineTest extends SpringTest {
 
     private CheckResult testCreateQuizNoAuth(int quizNum) {
         String url = "/api/quizzes";
-        HttpResponse resp = post(url, quizzes[quizNum]).send();
+        HttpRequest req = post(url, quizzes[quizNum]);
+        HttpResponse resp = req.send();
         checkStatusCode(resp, 401);
         return CheckResult.correct();
     }
 
     private CheckResult testCreateQuizFakeAuth(int quizNum) {
         String url = "/api/quizzes";
-        HttpResponse resp = auth(post(url, quizzes[quizNum]), 3).send();
+        HttpRequest req = post(url, quizzes[quizNum]);
+        HttpResponse resp = auth(req, 3).send();
         checkStatusCode(resp, 401);
         return CheckResult.correct();
     }
 
     private CheckResult testSolveQuizNoAuth(int quizNum, String answerSent) {
         String url = "/api/quizzes/" + quizNum + "/solve";
-        HttpRequest req = post(url, "{" + " \"answer\" : " + answerSent + "}");;
+        HttpRequest req = post(url, "{" + " \"answer\" : " + answerSent + "}");
         HttpResponse resp = req.send();
         checkStatusCode(resp, 401);
         return CheckResult.correct();
@@ -468,14 +551,32 @@ public class WebQuizEngineTest extends SpringTest {
 
     private CheckResult testDeleteQuizzesNoAuth(int quizNum) {
         String url = "/api/quizzes/" + quizNum;
-        HttpResponse resp = delete(url).send();
+        HttpRequest req = delete(url);
+        HttpResponse resp = req.send();
         checkStatusCode(resp, 401);
         return CheckResult.correct();
     }
 
     private CheckResult testDeleteQuizzesFakeAuth(int quizNum) {
         String url = "/api/quizzes/" + quizNum;
-        HttpResponse resp = auth(delete(url), 3).send();
+        HttpRequest req = delete(url);
+        HttpResponse resp = auth(req, 3).send();
+        checkStatusCode(resp, 401);
+        return CheckResult.correct();
+    }
+
+    private CheckResult testCompletedQuizzesNoAuth() {
+        String url = "/api/quizzes/completed";
+        HttpRequest req = get(url).addParam("page", "0");
+        HttpResponse resp = req.send();
+        checkStatusCode(resp, 401);
+        return CheckResult.correct();
+    }
+
+    private CheckResult testCompletedQuizzesFakeAuth() {
+        String url = "/api/quizzes/completed";
+        HttpRequest req = get(url).addParam("page", "0");
+        HttpResponse resp = auth(req, 3).send();
         checkStatusCode(resp, 401);
         return CheckResult.correct();
     }
@@ -551,13 +652,46 @@ public class WebQuizEngineTest extends SpringTest {
         return CheckResult.correct();
     }
 
-    private CheckResult testAllQuizzes(int count, int user) {
+    private CheckResult testAllQuizzes(int count, int page, int user) {
         String url = "/api/quizzes";
-        HttpResponse resp = auth(get(url), user).send();
+        HttpRequest req = get(url).addParam("page", "" + page);
+        HttpResponse resp = auth(req, user).send();
         checkStatusCode(resp, 200);
 
         expect(resp.getContent()).asJson().check(
-            isArray(count, isObject().anyOtherValues())
+            isObject()
+                .value("content", isArray(count, isObject()
+                    .value("id", isInteger())
+                    .value("title", isString())
+                    .value("text", isString())
+                    .value("options", isArray(any()))
+                ))
+                .anyOtherValues()
+        );
+
+        return CheckResult.correct();
+    }
+
+    private CheckResult testCompletedQuizzes(int count, int user, int page, int indexForCheckingQuizId, int quizNum) {
+        String url = "/api/quizzes/completed";
+        HttpRequest req = get(url).addParam("page", "" + page);
+        HttpResponse resp = auth(req, user).send();
+        checkStatusCode(resp, 200);
+
+        expect(resp.getContent()).asJson().check(
+            isObject()
+                .value("content",
+                    isArray(count,
+                        isObject()
+                            .value("id", isInteger())
+                            .value("completedAt", isString()))
+
+                        .item(indexForCheckingQuizId,
+                            isObject()
+                                .value("id", quizNum)
+                                .value("completedAt", isString()))
+                )
+                .anyOtherValues()
         );
 
         return CheckResult.correct();
@@ -599,7 +733,7 @@ public class WebQuizEngineTest extends SpringTest {
         try {
             reloadSpring();
         } catch (Exception ex) {
-            throw new UnexpectedError(ex.getMessage());
+            throw new UnexpectedError(ex.getMessage(), ex);
         }
         return CheckResult.correct();
     }

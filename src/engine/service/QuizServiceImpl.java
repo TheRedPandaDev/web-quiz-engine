@@ -2,6 +2,9 @@ package engine.service;
 
 import engine.model.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,8 +37,8 @@ public final class QuizServiceImpl implements QuizService {
         return quizRepository.save(newQuiz);
     }
 
-    public List<Quiz> getAllQuizzes() {
-        return (List<Quiz>) quizRepository.findAll();
+    public Page<Quiz> getAllQuizzes(int page) {
+        return quizRepository.findAll(PageRequest.of(page, 10, Sort.by("id")));
     }
 
     public Quiz getQuizById(Long id) {
