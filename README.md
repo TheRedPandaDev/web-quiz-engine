@@ -4,6 +4,8 @@
 
 #### POST [/register](http://localhost:8889/api/register)
 Register a new user
+
+Consumes a JSON:
 ```javascript
 {
   "email": "your@email.com", // Must have a valid format (with @ and .)
