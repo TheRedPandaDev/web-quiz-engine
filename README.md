@@ -1,8 +1,15 @@
 # Web Quiz Engine
 
-*Currently in development*
-
 ## API [/api](http://localhost:8889/api)
+
+#### POST [/register](http://localhost:8889/api/register)
+Register a new user
+```javascript
+{
+  "email": "your@email.com", // Must have a valid format (with @ and .)
+  "password": "secret" // Must have at least five characters
+}
+```
 
 #### GET [/quiz](http://localhost:8889/api/quiz)
 Get a sample quiz
@@ -38,3 +45,6 @@ Consumes a JSON:
   "answer": [0,1]
 }
 ```
+
+#### DELETE [/quizzes/{id}](http://localhost:8889/api/quizzes/{id})
+Delete your quiz by id specified by the path variable
